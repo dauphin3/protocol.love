@@ -3,7 +3,7 @@ node_modules/
 target/
 .hc
 conductor-config.toml
-
+.DS_store
 *.tsbuildinfo
 .idea
 .env
