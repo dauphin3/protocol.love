@@ -14,7 +14,7 @@ use crate::utils::{t};
 /// Api params with name, optional agent_address, & optional status.
 ///
 /// Convertable into [PersonParams](struct.PersonParams.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct OptionalPersonParams {
 	pub name: String,
 	/// Optional agent_address defaults to hdk::AGENT_ADDRESS
@@ -40,7 +40,7 @@ impl Into<PersonParams> for OptionalPersonParams {
 }
 
 /// Params for [create_person](fn.create_person.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct PersonParams {
 	pub name: String,
 	pub agent_address: Address,
@@ -58,7 +58,7 @@ impl Default for PersonParams {
 }
 
 /// Is the [Person](struct.Person.html) Active or Inactive.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub enum PersonStatus {
 	/// [Person](struct.Person.html) is currently active in the [Collective](struct.Collective.html).
 	Inactive,
@@ -67,7 +67,7 @@ pub enum PersonStatus {
 }
 
 /// Person participating with a [Collective](struct.Collective.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct Person {
 	/// Address of the Person's Holochain agent.
 	pub agent_address: Address,
@@ -88,7 +88,7 @@ impl Default for Person {
 }
 
 /// Api payload containing the `person_address` & [person](struct.Person.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct PersonPayload {
 	pub person_address: Address,
 	pub person: Person,

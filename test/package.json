@@ -1,4 +1,5 @@
 {
+	"scripts": {"test": "node index.js"},
 	"dependencies": {
 		"@ctx-core/object": "^8.0.8",
 		"@holochain/tryorama": "^0.3.2-dev.3",

@@ -10,7 +10,7 @@ use holochain_wasm_utils::holochain_core_types::entry::Entry;
 use crate::utils::t;
 
 /// A ledger to account for transactions relating to a [Collective](struct.Collective.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct Ledger {
 	pub name: String,
 }

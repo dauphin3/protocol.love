@@ -28,7 +28,8 @@ use hdk::prelude::ValidatingEntryType;
 /// }
 /// ```
 ///
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[hdk_extern(id = "action")]
+#[derive(Clone, Copy)]
 pub struct Action {
 	/// Represents each of the allowed operations
 	pub op: ActionOp,
@@ -42,9 +43,14 @@ pub struct Action {
 	/// How the Action was performed
 	pub strategy: ActionStrategy,
 }
+#[hdk_extern(id = "address")]
+#derive(Clone, Copy]
+pub struct Address {
+	pub address: Vec<Address>,
+}
 
 /// An operation for an [Action](struct.Action.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub enum ActionOp {
 	CreateCollective,
 	AddCollectivePerson,
@@ -52,7 +58,7 @@ pub enum ActionOp {
 }
 
 /// The lifecycle status of an [Action](struct.Action.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub enum ActionStatus {
 	/// Action is currently opened & not completed
 	Open,
@@ -63,7 +69,7 @@ pub enum ActionStatus {
 }
 
 /// How an [Action](struct.Action.html) is performed.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub enum ActionStrategy {
 	/// Performed via automation by the system
 	SystemAutomatic,
@@ -73,38 +79,19 @@ pub enum ActionStrategy {
 	NewDiscussionMessage,
 }
 
-/// An api payload returning [Actions](struct.Action.html) & the `collective_address`.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
-pub struct ActionsPayload {
-	pub collective_address: Address,
-	pub actions: Vec<Action>,
-}
-
 /// A tuple containing an [Address](type.Address.html), [Entry](enum.Entry.html), & [Action](struct.Action.html)
 pub type ActionEntry = (Address, Entry, Action);
 
+// * might need to make self an address reference * //
 pub trait RootAction {
-	fn commit_action(self, collective_address: Address) -> ZomeApiResult<ActionEntry>;
+	fn commit_action(self, collective_address: Address) -> ExternResult<ActionEntry>;
 }
 
 pub trait ChildAction {
-	fn commit_action(self, collective_address: Address, parent_action_address: Address) -> ZomeApiResult<ActionEntry>;
+	fn commit_action(self, collective_address: Address, parent_action_address: Address) -> ExternResult<ActionEntry>;
 }
 
-impl RootAction for Action {
-	fn commit_action(self, collective_address: Address) -> ZomeApiResult<ActionEntry> {
-		let action_entry = Entry::App("action".into(), self.borrow().into());
-		let action_address = hdk::commit_entry(&action_entry)?;
-		hdk::link_entries(
-			&collective_address,
-			&action_address,
-			"collective->action",
-			"root_action",
-		)?;
-		Ok((action_address, action_entry, self))
-	}
-}
-
+//todo
 impl ChildAction for Action {
 	fn commit_action(self, collective_address: Address, parent_action_address: Address) -> ZomeApiResult<ActionEntry> {
 		let action_entry = Entry::App("action".into(), self.borrow().into());
@@ -121,11 +108,11 @@ impl ChildAction for Action {
 			"child->action",
 			"",
 		)?;
-		Ok((action_address, action_entry, self))
+		Ok((ActionAddress, ActionEntry, self))
 	}
 }
 
-/// Returns a Holochain entry definition for an action.
+/// Returns a Holochain entry definition for an action. /* need to change */
 pub fn action_def() -> ValidatingEntryType {
 	entry!(
 		name: "action",
@@ -161,23 +148,6 @@ pub fn action_def() -> ValidatingEntryType {
 		]
 	)
 }
+/* */
 
-/// Get an [ActionsPayload](struct.ActionsPayload.html) of all of the [Actions](struct.Action.html)
-/// linked to the [Collective](struct.Collective.html).
-///
-/// # Test:
-/// ```
-/// curl -X POST -H "Content-Type: application/json" -d '{"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": "test-instance", "zome": "protocol-love", "function": "get_collective", "args": { "collective_address": "addr" } }}' http://127.0.0.1:8888
-/// ```
-pub fn get_actions(collective_address: Address) -> ZomeApiResult<ActionsPayload> {
-	let mut actions = hdk::utils::get_links_and_load_type(
-		&collective_address,
-		LinkMatch::Exactly("collective->action"),
-		LinkMatch::Any,
-	)?;
-	actions.reverse();
-	Ok(ActionsPayload {
-		collective_address,
-		actions,
-	})
-}
+entry_defs![Address::entry_def(), Entry::entry_def(), Action::entry_def()]

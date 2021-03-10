@@ -19,7 +19,7 @@ use holochain_wasm_utils::api_serialization::get_links::{GetLinksOptions};
 /// A collective.
 ///
 /// Has a name & an optional admin_address.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct Collective {
 	/// Name of the Collective
 	pub name: String,
@@ -32,7 +32,7 @@ pub struct Collective {
 }
 
 /// Api params to create a [Collective](struct.Collective.html) along with an optional `admin_address`.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct CreateCollectiveParams {
 	pub name: String,
 	pub admin_address: Option<Address>,
@@ -57,7 +57,7 @@ impl Default for Collective {
 }
 
 /// Api payload containing a collective_address & collective.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct CollectivePayload {
 	pub collective_address: Address,
 	pub collective: Collective,
@@ -73,7 +73,7 @@ impl Default for CollectivePayload {
 }
 
 /// Tag of a [Person](struct.Person.html) in a [Collective](struct.Collective.html).
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub enum CollectivePersonTag {
 	/// Creator of the [Collective](struct.Collective.html)
 	Creator,
@@ -86,7 +86,7 @@ impl fmt::Display for CollectivePersonTag {
 }
 
 /// Api Payload of People in a Collective.
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 pub struct CollectivePeoplePayload {
 	pub collective_address: Address,
 	/// [People](struct.Person.html) in a [Collective](struct.Collective.html).
@@ -259,7 +259,10 @@ pub fn create_collective(
 /// # Test:
 ///
 /// curl -X POST -H "Content-Type: application/json" -d '{"id": "0", "jsonrpc": "2.0", "method": "call", "params": {"instance_id": "test-instance", "zome": "protocol-love", "function": "get_collective", "args": { "collective_address": "addr" } }}' http://127.0.0.1:8888
-pub fn get_collective(collective_address: Address) -> ZomeApiResult<CollectivePayload> {
+
+#[hdk_extern(collective_address: Address)]
+#derive( Debug, Clone, Serialize, Deserialize, Serializedbytes)]
+pub fn get_collective(collective_address: Address) -> ExternResult<CollectivePayload> {
 	let collective_address__ = collective_address.clone();
 	let collective =
 		hdk::utils::get_as_type(collective_address__)?;
@@ -384,7 +387,7 @@ fn create_add_collective_person_action(
 	)
 }
 
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 struct SetCollectiveNameActionData {
 	name: String
 }
@@ -411,7 +414,7 @@ fn create_set_collective_name_action(
 	)
 }
 
-#[derive(Serialize, Deserialize, Debug, DefaultJson, Clone)]
+#[derive(Serialize, Deserialize, Debug, Serializedbytes, Clone)]
 struct SetTotalSharesActionData {
 	total_shares: i64,
 }
